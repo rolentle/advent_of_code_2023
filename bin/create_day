@@ -1,0 +1,40 @@
+#!/bin/bash
+
+day="day_$1"
+
+module_file="aoc/$day.py"
+cat <<EOF > $module_file
+def $day():
+    return True
+EOF
+
+sample_data_file="fixtures/${day}_sample.txt"
+touch $sample_data_file
+
+data_file="fixtures/$day.txt"
+touch $data_file
+
+test_file="tests/${day}_test.py"
+cat <<EOF > $test_file
+import pytest
+from aoc.$day import *
+
+@pytest.fixture
+def ${day}_sample_data():
+    f = open("$sample_data_file")
+    return f.read()
+
+def ${day}_data():
+    f = open("$data_file")
+    return f.read()
+
+${day}_test_data = [
+    (${day}_sample_data(), 0),
+    (${day}_data(), 0),
+]
+
+# Test function
+@pytest.mark.parametrize("data, expected_value", ${day}_test_data)
+def test_${day}_part_1(data, expected_value):
+    assert $day(data) == False
+EOF
